@@ -1,0 +1,489 @@
+<!doctype html>
+<meta charset="utf-8">
+<html>
+	<head>
+		<title>
+			Weather Balloon Sounding Sonification
+		</title>
+		
+		<style>
+
+body{ 
+
+font-family: 'Helvetica';
+font-size: 15px;
+color: #000; 
+letter-spacing: 1px;
+background-color: #F5F5F5;
+
+}
+
+
+h1{
+
+font-size: 60px;
+
+}
+
+h2{
+letter-spacing:1.2px;
+line-height: 0.8;
+font-size: 18px;
+font-weight:normal
+
+}
+
+h3{
+line-height: 1.1;
+font-size: 30px;
+font-weight:normal
+}
+
+h4{
+line-height: 1.4;
+font-size: 13px;
+font-weight:normal
+}
+
+br {
+line-height: 150%;
+}
+
+a{
+	text-decoration: none;
+	-webkit-transition: 0.2s;
+	transition: color .2s;
+}
+a:link{
+	color: #4589CA;
+}
+a:visited{
+	color: #4589CA;
+}
+a:visited:hover{
+	color: #D2D2D2;
+}
+a:hover{
+	color:#D2D2D2;
+}
+
+
+.links{
+	font: 'Helvetica Light';
+	font-size: 30px;
+	font-weight: 100;
+}
+
+#container { width: 1000px; margin: auto;}
+#mainbox{ float: left; }
+#hodobox { width: 300px; float: left;}
+#about_skewt {clear: both;}
+
+.skewtbg {z-index: -1;}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1px;
+/*   shape-rendering: crispEdges; */
+}
+
+.x.axis path { stroke: #000; }
+.y.axis path { stroke: #000; }
+.axis { fill: #000; }
+.y.axis { font-size: 13px; }
+.y.axis.hght { font-size: 9px; fill: red;}
+.x.axis { font-size: 13px; }
+.y.axis.ticks text { display: none; }
+
+.dgz {
+  fill: none;
+  stroke: #79BDDF;
+  stroke-width:3px;
+}
+.temperature {
+  fill: none;
+  stroke: red;
+  stroke-width: 2px;
+}
+.dewpoint {
+  fill: none;
+  stroke: green;
+  stroke-width: 2px;
+}
+.parcel {
+  fill: none;
+  stroke-dasharray: 4;
+  stroke: #EA631B;
+  stroke-width: 1.8px;
+
+}
+.MUparcel {
+  stroke-dasharray: 3;
+  stroke: #EA1B8C;
+  stroke-width: 1.3px;
+  fill: none;
+}
+
+
+
+.hodoline { 
+	stroke: #405B72;
+	fill: none;
+	stroke-width: 2px;
+}
+
+.gridline {
+   stroke: #9099A2;
+   stroke-width: 0.70px;
+   fill: none;
+   z-index: -1;
+}
+
+.dryline {
+   stroke: #9099A2;
+   stroke-width: 0.70px;
+   fill: none;
+   z-index: -1;
+}
+.moistLine {
+   stroke: #405B72;
+   stroke-dasharray: 5
+   stroke-width: 0.90px;
+   fill: none;
+   z-index: -1;
+}
+.mixLine {
+    display: null;
+	stroke-width: 0.70px;
+	opacity: 0.75;
+}
+
+.mixtext {
+	color: purple;
+	fill: purple;
+	stroke: purple;
+	font-size: 12px;
+	opacity: 0.8;
+}
+
+
+.barline { stroke: #000; stroke-width: 0.5px; }
+.rectline { fill: #aaa; opacity: 0.5;}
+.rectline2 { file: #000; }
+.index { font-size: 13px; }
+.header { font-weight: bold; font-size: 11px;}
+.hodolabels { font-size: 9px; opacity: 0.5;, color: #000;}
+.key { font-size: 10px; }
+
+
+.windbarb { stroke: #000; stroke-width: 0.75px; }
+.flag { stroke: #000; fill: #000; }
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus.temperature { color: red; font-weight: normal; font-size: 10px; fill: red;}
+.focus.dewpoint  {  color: green; font-weight: normal; font-size: 11px; fill: green;}
+.focus.parcel { font-weight: normal; font-size: 10px; fill: #EA631B;}
+
+.focus.temperature .tmp_text { font-weight: bold; font-size: 12px; fill: red;}
+.focus.dewpoint .dpt_text  { font-weight: bold; font-size: 12px; fill: green;}
+.focus.parcel .prcl_text { font-weight: normal; font-size: 12px; fill: #EA631B;}
+
+
+.focus text { font-size: 12px; fill: #000; z-index: 3;}
+
+.sphere {
+  fill: #F5F5F5;
+}
+
+.hidden {
+  display: none;
+}
+
+div.tooltip {
+  background-color: #4F4F4F;
+  padding: 7px;
+  /* text-shadow: #f5f5f5 0 1px 0; */
+  font: 15px Helvetica Neue;
+  color: #EEEEEE;
+  border: 2.5px solid;
+  border-color: black;
+	border-radius: 3px;
+  opacity: 0.95;
+  position: absolute;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 2px 10px;
+}
+
+#creds{
+position: relative;
+bottom: 0;
+line-height: 2;
+font-size: 11px;
+font-weight:normal
+}
+
+		</style>
+		
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		<script src="https://d3js.org/d3.v3.min.js"></script>
+		<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+		
+		<script src="/weather_balloon_sonification/web-audio-api-shim.js"></script>
+		<script src="/weather_balloon_sonification/soundfont-player.min.js"></script>
+
+		
+		<script>
+		
+		var show_dryads=1, show_thetaE=1;
+  		
+  		function dryads() {
+  		drylines = document.getElementsByClassName('dryline');
+  		if(show_dryads==1){
+  			console.log("hide dry adiabats");
+			drylines[0].style.display = "none";
+			drylines[1].style.display = "none";
+			drylines[2].style.display = "none";
+			drylines[3].style.display = "none";
+			drylines[4].style.display = "none";
+			drylines[5].style.display = "none";
+			drylines[6].style.display = "none";
+			drylines[7].style.display = "none";
+			drylines[8].style.display = "none";
+			drylines[9].style.display = "none";
+			drylines[10].style.display = "none";
+			drylines[11].style.display = "none";
+			drylines[12].style.display = "none";
+			drylines[13].style.display = "none";
+  			show_dryads = 0;
+  			} else {
+  			console.log("show dry adiabats");
+  			drylines[0].style.display = null;
+			drylines[1].style.display = null;
+			drylines[2].style.display = null;
+			drylines[3].style.display = null;
+			drylines[4].style.display = null;
+			drylines[5].style.display = null;
+			drylines[6].style.display = null;
+			drylines[7].style.display = null;
+			drylines[8].style.display = null;
+			drylines[9].style.display = null;
+			drylines[10].style.display = null;
+			drylines[11].style.display = null;
+			drylines[12].style.display = null;
+			drylines[13].style.display = null;
+  			show_dryads = 1;
+  			}
+  		}
+  		
+  		function thetaEs() {
+  		mixers = document.getElementsByClassName('mixLine');
+  		mixtxt = document.getElementsByClassName('mixtext');
+  		if(show_thetaE==1){
+  			console.log("hide mixing lines");
+//   			For some reason, iterating with a loop doesn't work, so doing this manually...
+			mixers[0].style.display = "none";
+			mixers[1].style.display = "none";
+			mixers[2].style.display = "none";
+			mixers[3].style.display = "none";
+			mixers[4].style.display = "none";
+			mixers[5].style.display = "none";
+			mixers[6].style.display = "none";
+			mixers[7].style.display = "none";
+			mixers[8].style.display = "none";
+			mixers[9].style.display = "none";
+			
+			mixtxt[0].style.display = "none";
+			mixtxt[1].style.display = "none";
+			mixtxt[2].style.display = "none";
+			mixtxt[3].style.display = "none";
+			mixtxt[4].style.display = "none";
+			mixtxt[5].style.display = "none";
+			mixtxt[6].style.display = "none";
+			mixtxt[7].style.display = "none";
+			mixtxt[8].style.display = "none";
+			mixtxt[9].style.display = "none";
+  			show_thetaE = 0;
+  			} else {
+  			console.log("show mixing lines");
+  			mixers[0].style.display = "none";
+			mixers[1].style.display = null;
+			mixers[2].style.display = null;
+			mixers[3].style.display = null;
+			mixers[4].style.display = null;
+			mixers[5].style.display = null;
+			mixers[6].style.display = null;
+			mixers[7].style.display = null;
+			mixers[8].style.display = null;
+			mixers[9].style.display = null;
+			
+			mixtxt[0].style.display = null;
+			mixtxt[1].style.display = null;
+			mixtxt[2].style.display = null;
+			mixtxt[3].style.display = null;
+			mixtxt[4].style.display = null;
+			mixtxt[5].style.display = null;
+			mixtxt[6].style.display = null;
+			mixtxt[7].style.display = null;
+			mixtxt[8].style.display = null;
+			mixtxt[9].style.display = null;
+  			show_thetaE = 1;
+  			}
+  		}
+  		</script>
+
+  		
+	</head>
+	
+	<body id="pageBody">
+	
+	<h1>
+		Weather Balloon Sounding Sonification
+	</h1>
+	<h3>
+		Written by Paul Tisch
+	</h3>
+	<a href="/webDesign.html" class="links">Back to Web Design</a><br><br>
+	<a href="/index.html" class="links">Home</a>
+	<br>
+	<br>
+	<select id="exampleSoundings" onchange=displayGraphs()>
+		<option value="ffc.csv" selected>FFC 4/26/2011</option>
+<!-- 
+		<option value="oax.csv">OAX 5/22/2011</option>
+		<option value="tlh.csv">TLH 3/3/2019</option>
+ -->
+	</select>
+	
+<br>	
+	<div id="container">
+
+<h2 id='instructions' >Click anywhere outside the graph to start audio, click anywhere to stop audio. <br/> Press C to show or hide CAPE and CIN. <br/> Press U or W then move mouse to change temperature units or wind units, respectively. <br/> Press P to change PWAT units.</h2>
+<br>
+<br>
+<h2 id='d3_header'></h2>
+
+	<div id="sonify_div" style="display:none">
+	Variable(s) to sonify:
+		<select id = "sonify_select" name="sonify_select" onchange=select_sonify()>
+  			<option value="T_Td" id="T_Td">Temperature and Dewpoint Temperature</option>
+  			<option value="T" id="T">Temperature</option>
+  			<option value="Td" id="Td">Dewpoint Temperature</option>
+  			<option value="DD" id="DD">Dewpoint Depression</option>
+  			<option value="T_Tp" id="T_Tp">Parcel Temperature and Environmental Temperature</option>
+  			<option value="Tp" id="Tp">Parcel Temperature minus Environmental Temperature</option>
+  			<option value="speed" id="speed">Wind Speed</option>
+  			<option value="dir" id="dir" disabled>Wind Direction</option>
+  		</select>
+  		
+  	Musical scale:
+  		<select id = "scale_select" name="scale_select" onchange=scale_select()>
+  			<option value="dtnc" id="dtnc" selected>Diatonic</option>
+  			<option value="chrm" id="chrm">Chromatic</option>
+  			<option value="WT" id="WT">Whole Tone</option>
+  			<option value="dim1" id="dim1">Diminished 1</option>
+  			<option value="dim2" id="dim2">Diminished 2</option>
+  		</select>
+	</div>	
+
+		<div id="mainbox"></div>
+		<div id="hodobox"></div>
+		<div id="btmBox"></div>
+		<div id="display_options" style="display:none">
+		<br>
+		<br>
+			<h4>Show/hide:</h4>
+			<input type="checkbox" id="dry_ads_chk" value="dry_ads" onchange="dryads()" checked>Dry Adiabats<br>
+			<input type="checkbox" id="theta_e_chk" value="theta_e" onchange="thetaEs()" checked>Mixing Ratio (&theta;<sub>E</sub>)
+		</div>
+
+		<script src="/weather_balloon_sonification/d3_interface.js"></script>
+	</div>
+	<br>
+	<br>
+	<br>
+	<div id="about_skewt">
+	<h2> About Soundings: </h2>
+		<p>
+		<a href="http://www.theweatherprediction.com/thermo/skewt/">Here</a> is a good 
+		introduction to reading "skew-T log-p" charts, also known as 
+		soundings.  These graphs are generated from data gathered from weather balloons 
+		that are released twice daily at stations all around the globe.  Attached to the 
+		balloons are small weather stations that record pressure, altitude, temperature, 
+		relative humidity, wind speed and wind direction, and send the data back to the 
+		station from which it was released.  (More info 
+		<a href="https://www.weather.gov/upperair/factsheet">here</a> on radiosondes.)
+		</br>
+		</br>
+	<h2> How to read the graph: </h2>
+		The red line represents Air Temperature (also known as Environmental Air Temperature
+		or Ambient Air Temperature).
+		</br>
+		</br>
+		The green line represents Dewpoint Temperature, or the temperature at which water 
+		in the air condenses and becomes liquid (clouds).
+		</br>
+		</br>
+		The yellow dashed line represents parcel temperature.  
+		<a href="http://www.theweatherprediction.com/habyhints3/953/">Here</a> is an
+		explanation of parcel theory.  When the parcel temperature is greater than the
+		air temperature, the atmosphere is unstable and has positive CAPE (discussed below).
+		 In this scenario, the parcel will buoyantly rise until the parcel temperature again
+		 falls below the environmental temperature.
+		</br>
+		</br>
+		<a href="https://weather.cod.edu/sirvatka/hodo.html">Here</a> is information on
+		reading hodographs.  Hodographs are generated from the wind data provided in the 
+		sounding and show both wind speed and direction.  Different hodograph shapes can
+		indicate the possibility for different kinds of weather (for example, curly hodographs
+		can indicate the potential for supercells and tornadoes).
+		</br>
+		</br>
+		Convective Available Potential Energy (CAPE) and Convective Inhibition (CIN) 
+		represent positive and negative potential energy, or buoyancy, in the atmosphere, 
+		respectively.  Large CAPE values (>1000 J/kg) indicate an atmosphere conducive to 
+		thunderstorm production.  However, a parcel of air must be lifted past a layer of 
+		CIN to become buoyant in a layer of CAPE.  
+		<a href="http://www.theweatherprediction.com/habyhints3/905/">Here</a> is more 
+		info on CAPE and CIN.
+		</br>
+		</br>
+		Please note that this website initially used Python, including the modules Flask,
+		 Siphon, and Metpy which allowed the user to select any station on any date.
+		 However, I am running my site using Hostgator.com which doesn't allow me to
+		 install these modules on the site...something I wish I found out before I paid
+		 for their service.  If you know how to use Flask and would like the code, please
+		  email me at <a href="mailto:paul.l.tisch@gmail.com">paul.l.tisch@gmail.com</a>.
+		</p>
+	</div>
+	
+	<br>
+	<br>
+	
+	<div id="creds">
+		Data from the <a href='http://weather.uwyo.edu/upperair/'>University of Wyoming</a>
+		<br>
+
+		Based on <a href='https://github.com/rsobash/d3-skewt'>"D3 Skew-T" by Ryan Sobash</a> and 
+		<a href='http://www.stephenandrewtaylor.net/x-value-mouseover/index.html'>"X Value Mouseover Sonification" by Stephen Taylor</a>
+	</div>
+		
+		<script>
+  			function displayGraphs(){
+  		  			upload_data();
+  			  		drawBackground();
+  					makeBarbTemplates();
+					drawToolTips();
+  					document.getElementById("instructions").style.display = "inline";
+  					document.getElementById("sonify_div").style.display = "inline";
+  					
+  			}
+  			displayGraphs();
+  		</script>
+		
+	</body>
+</html>
